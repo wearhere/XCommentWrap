@@ -58,8 +58,26 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             
             let commonLeading = parsedLines[0].0
             
-            let fullText = parsedLines.map({ $1 }).joined(separator: " ")
-            let wrappedLines = wrap(string: fullText, to: 80 - commonLeading.count)
+            // Now go through and wrap all the lines in the selection, while
+            // preserving paragraph breaks in the selection.
+            var wrappedLines = Array<String>()
+            var paragraphLines = Array<String>()
+            func flushParagraphLines() {
+                let wrappedParagraphLines = wrapLines(paragraphLines, to: 80 - commonLeading.count)
+                wrappedLines.append(contentsOf: wrappedParagraphLines)
+                paragraphLines = []
+            }
+            while parsedLines.count > 0 {
+                let line = parsedLines.removeFirst().1
+                if line.isEmpty {
+                    // This is a paragraph break.
+                    flushParagraphLines()
+                    wrappedLines.append(line)
+                } else {
+                    paragraphLines.append(line)
+                }
+            }
+            flushParagraphLines()
             
             let finalLines = wrappedLines.map({ commonLeading + $0 })
             
@@ -81,6 +99,16 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
         let leadingRange = match.range(at: 1)
         let remainingRange = match.range(at: 2)
         return (nsline.substring(with: leadingRange), nsline.substring(with: remainingRange))
+    }
+ 
+    /// Wrap an array of lines.
+    ///
+    /// - Parameter lines: The lines to wrap.
+    /// - Parameter width: The width to which to wrap.
+    /// - Returns: An array of lines.
+    func wrapLines(_ lines: [String], to width: Int) -> [String] {
+        let fullText = lines.joined(separator: " ")
+        return wrap(string: fullText, to: width)
     }
     
     /// Wrap a string into individual lines.
