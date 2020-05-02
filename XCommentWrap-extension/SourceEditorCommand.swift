@@ -28,13 +28,34 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             
             let lines = buffer.lines.subarray(with: lineRange) as! [String]
             
-            let parsedLines = lines.compactMap(parse)
+            var parsedLines = lines.compactMap(parse)
             guard parsedLines.count == lines.count else {
                 // The user selected both comment lines and code lines here,
                 // or maybe even _just_ code lines. Rather than truncate and/or
                 // split the range we're formatting, it's simpler to abort.
                 return completionHandler(nil)
             }
+            
+            // Now we have the lines representing the user's initial selection.
+            // Expand this to the end of their current paragraph in their
+            // current comment block so that when we wrap a line at the start
+            // of the paragraph, we'll "backfill" the new line from the rest
+            // of the paragraph.
+            var nextLine = NSMaxRange(lineRange);
+            while nextLine < buffer.lines.count - 1 {
+                guard let parsedComment = parse(line: buffer.lines[nextLine] as! String) else {
+                    // We've reached the end of the comment block altogether.
+                    break
+                }
+                guard !parsedComment.1.isEmpty else {
+                    // We've reached the break between paragraphs.
+                    break
+                }
+                parsedLines.append(parsedComment)
+                lineRange.length += 1
+                nextLine += 1
+            }
+            
             let commonLeading = parsedLines[0].0
             
             let fullText = parsedLines.map({ $1 }).joined(separator: " ")
