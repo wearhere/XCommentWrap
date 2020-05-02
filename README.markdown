@@ -19,7 +19,24 @@ Into this:
     // This thing does the thing and then afterwards it does the other thing, which
     // eventually results in doing the last thing.
 
-# How It Works
+# How to use this
+
+This hasn't yet been published to the App Store, so you'll need to build it from source. This
+involves code signing it but that's actually pretty simple _and free_ nowadays! Here's a guide:
+
+1. Clone this repository.
+2. Add your iCloud account to Xcode in Preferences -> Accounts. This does _not_ need to be a paid
+   developer account.
+3. With the project file selected, set both build targets to use your "Personal Team" on the
+   Signing and Capabilities tab.
+4. Build and run the "XCommentWrap" scheme. After the XCommentWrap app launches, you can quit it.
+5. Open System Preferences -> Extensions.
+5. Find XCommentWrap and enable Xcode Source Editor extension
+
+Finally, highlight some code in Xcode and choose Editor -> XCommentWrap -> Hard Wrap Comment. You can
+assign a key binding to this if you like in Xcode's preferences.
+
+# How it works
 
 It splits each line into a leading area and a trailing area, considering a leading area to be a sequence of spaces, tabs, `/`, and `*` characters. It then concatenates the trailing areas together with spaces in between and applies a hard wrap to the resulting string. Finally, it takes the leading area from the first line and prepends it to every line.
 
@@ -54,6 +71,14 @@ it'll produce
 For safety's sake, the extension will no-op if you have lines of code selected. (You probably want
 to wrap those at syntactic breaks like after arguments in a function call, not merely at the page
 guide.)
+
+# How to contribute
+
+Switch the project to the XCommentWrap-extension scheme and build and run. A test version of Xcode
+will open with the debugger from the real Xcode attached. This is described in more detail in
+https://developer.apple.com/documentation/xcodekit/testing_your_source_editor_extension.
+
+To get the changes to show up in the real Xcode, you'll need to relaunch it.
 
 # License
 

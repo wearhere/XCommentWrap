@@ -446,6 +446,7 @@
 				C25C8C021F24222400696E53 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C25C8C151F24225400696E53 /* Build configuration list for PBXNativeTarget "XCommentWrap-extension" */ = {
 			isa = XCConfigurationList;
@@ -454,6 +455,7 @@
 				C25C8C171F24225400696E53 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
