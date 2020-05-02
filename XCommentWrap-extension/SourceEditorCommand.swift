@@ -10,7 +10,7 @@ import XcodeKit
 
 import Swift
 
-let lineRegex = try! NSRegularExpression(pattern: "^([ \t/*]*)(.*)$", options: [])
+let lineRegex = try! NSRegularExpression(pattern: "^([ \t]*[/*]+[ \t]*)(.*)$", options: [])
 
 class SourceEditorCommand: NSObject, XCSourceEditorCommand {
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
@@ -27,7 +27,14 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             }
             
             let lines = buffer.lines.subarray(with: lineRange) as! [String]
-            let parsedLines = lines.map(parse)
+            
+            let parsedLines = lines.compactMap(parse)
+            guard parsedLines.count == lines.count else {
+                // The user selected both comment lines and code lines here,
+                // or maybe even _just_ code lines. Rather than truncate and/or
+                // split the range we're formatting, it's simpler to abort.
+                return completionHandler(nil)
+            }
             let commonLeading = parsedLines[0].0
             
             let fullText = parsedLines.map({ $1 }).joined(separator: " ")
@@ -42,12 +49,12 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
     }
     
     /// Split a string into two parts: indentation plus comment indicator, and actual comment text.
-    func parse(line: String) -> (String, String) {
+    func parse(line: String) -> (String, String)? {
         let nsline = line as NSString
         
         let matchOpt = lineRegex.firstMatch(in: line, options: [], range: NSRange(location: 0, length: nsline.length))
         guard let match = matchOpt else {
-            return ("", line)
+            return nil
         }
         
         let leadingRange = match.range(at: 1)
