@@ -41,7 +41,7 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             // current comment block so that when we wrap a line at the start
             // of the paragraph, we'll "backfill" the new line from the rest
             // of the paragraph.
-            var nextLine = NSMaxRange(lineRange);
+            var nextLine = NSMaxRange(lineRange)
             while nextLine < buffer.lines.count - 1 {
                 guard let parsedComment = parse(line: buffer.lines[nextLine] as! String) else {
                     // We've reached the end of the comment block altogether.
