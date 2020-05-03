@@ -36,6 +36,12 @@ involves code signing it but that's actually pretty simple _and free_ nowadays! 
 Finally, highlight some code in Xcode and choose Editor -> XCommentWrap -> Hard Wrap Comment. You can
 assign a key binding to this if you like in Xcode's preferences.
 
+If you go on to contribute to the extension, please do not commit the above changes to the project
+file since they will be specific to you. You can use [interactive staging] to commit other changes
+to the file.
+
+[interactive staging]: https://git-scm.com/book/en/v2/Git-Tools-Interactive-Staging
+
 # How it works
 
 It splits each line into a leading area and a trailing area, considering a leading area to be a sequence of spaces, tabs, `/`, and `*` characters. It then concatenates the trailing areas together with spaces in between and applies a hard wrap to the resulting string. Finally, it takes the leading area from the first line and prepends it to every line.
