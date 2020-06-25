@@ -175,9 +175,11 @@
 				TargetAttributes = {
 					C25C8BF11F24222400696E53 = {
 						CreatedOnToolsVersion = 9.0;
+						LastSwiftMigration = 1200;
 					};
 					C25C8C061F24225400696E53 = {
 						CreatedOnToolsVersion = 9.0;
+						LastSwiftMigration = 1200;
 					};
 				};
 			};
@@ -378,7 +380,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mikeash.XCommentWrap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -395,7 +397,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mikeash.XCommentWrap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -411,7 +413,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mikeash.XCommentWrap.XCommentWrap-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -427,7 +429,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mikeash.XCommentWrap.XCommentWrap-extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
