@@ -46,7 +46,8 @@ to the file.
 
 It splits each line into a leading area and a trailing area, considering a leading area to be a sequence of spaces, tabs, `/`, and `*` characters. It then concatenates the trailing areas together with spaces in between and applies a hard wrap to the resulting string. Finally, it takes the leading area from the first line and prepends it to every line.
 
-This means it will work on a bunch of single-line comments in sequence, whether they start with `//` or `///`. It will also work on multi-line comments provided your text is not on the same line as the initial comment indicator. It will not work on multi-line comments where the first line of text directly follows the `/*`. If you want that, you'll have to build it yourself.
+This means it will work on a bunch of single-line comments in sequence, whether they start with `//` or `///`. It will also work on multi-line comments provided your selection is not on the same line as the initial comment indicator nor the final comment indicator. If you want to be able to select the indicators or wrap a multi-line
+comment where the text directly follows the `/*`, please open a PR.
 
 The extension is "paragraph-aware": if your cursor is on the first line here when you invoke the
 extension

@@ -10,7 +10,11 @@ import XcodeKit
 
 import Swift
 
-let lineRegex = try! NSRegularExpression(pattern: "^([ \t]*[/*]+[ \t]*)(.*)$", options: [])
+let lineRegex = try! NSRegularExpression(pattern: "^([ \t]*[/*]*[ \t]*)(.*)$", options: [])
+let multiLineOpeningRegex = try! NSRegularExpression(pattern: "/\\*(?!.*\\*/)", options: [])
+// Multi-line comments can nest, but we're going to ignore that and say that the
+// first "*/" we find closes the comment.
+let multiLineClosingRegex = try! NSRegularExpression(pattern: "\\*/", options: [])
 
 class SourceEditorCommand: NSObject, XCSourceEditorCommand {
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
@@ -29,11 +33,31 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             let lines = buffer.lines.subarray(with: lineRange) as! [String]
             
             var parsedLines = lines.compactMap(parse)
-            guard parsedLines.count == lines.count else {
-                // The user selected both comment lines and code lines here,
-                // or maybe even _just_ code lines. Rather than truncate and/or
-                // split the range we're formatting, it's simpler to abort.
+            guard !parsedLines.isEmpty else {
                 return completionHandler(nil)
+            }
+            
+            let leadings = Set(parsedLines.map({ $0.0 }))
+            guard leadings.count == 1 else {
+                // The user either selected both comment lines and code lines,
+                // or comments of different styles (single-line, multi-line).
+                // This might be unintentional, and handling it would be more
+                // complex, so abort.
+                //
+                // Note that this means that if the user wants to wrap a
+                // multi-line comment, their text can't be on the same line as
+                // the opening and/or closing of the comment and they need to
+                // select only the middle lines. This is documented in the
+                // README.
+                return completionHandler(nil)
+            }
+            
+            let commonLeading = leadings.first!
+            if commonLeading.trimmingCharacters(in: .whitespaces).count == 0 {
+                guard rangeIsWithinMultiLineComment(lineRange, in: buffer.lines as! [String]) else {
+                    // This must be code. Abort.
+                    return completionHandler(nil)
+                }
             }
             
             // Now we have the lines representing the user's initial selection.
@@ -44,7 +68,11 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             var nextLine = NSMaxRange(lineRange)
             while nextLine < buffer.lines.count - 1 {
                 guard let parsedComment = parse(line: buffer.lines[nextLine] as! String) else {
-                    // We've reached the end of the comment block altogether.
+                    // Unknown condition, abort.
+                    break
+                }
+                guard parsedComment.0 == commonLeading else {
+                    // We've reached the end of the comment block.
                     break
                 }
                 guard !parsedComment.1.isEmpty else {
@@ -55,8 +83,6 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
                 lineRange.length += 1
                 nextLine += 1
             }
-            
-            let commonLeading = parsedLines[0].0
             
             // Now go through and wrap all the lines in the selection, while
             // preserving paragraph breaks in the selection.
@@ -87,7 +113,7 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
         completionHandler(nil)
     }
     
-    /// Split a string into two parts: indentation plus comment indicator, and actual comment text.
+    /// Split a string into two parts: indentation plus optional comment indicator, and actual comment text.
     func parse(line: String) -> (String, String)? {
         let nsline = line as NSString
         
@@ -99,6 +125,32 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
         let leadingRange = match.range(at: 1)
         let remainingRange = match.range(at: 2)
         return (nsline.substring(with: leadingRange), nsline.substring(with: remainingRange))
+    }
+    
+    func rangeIsWithinMultiLineComment(_ range: NSRange, in lines: [String]) -> Bool {
+        var openingFound = false, closingFound = false
+        
+        var previousLine = range.location - 1
+        while previousLine > -1 {
+            let line = lines[previousLine]
+            if multiLineOpeningRegex.firstMatch(in: line, options: [], range: NSRange(location: 0, length: line.count)) != nil {
+                openingFound = true
+                break
+            }
+            previousLine -= 1
+        }
+        
+        var nextLine = NSMaxRange(range)
+        while nextLine < lines.count {
+            let line = lines[nextLine]
+            if multiLineClosingRegex.firstMatch(in: line, options: [], range: NSRange(location: 0, length: line.count)) != nil {
+                closingFound = true
+                break
+            }
+            nextLine += 1
+        }
+        
+        return openingFound && closingFound
     }
  
     /// Wrap an array of lines.
